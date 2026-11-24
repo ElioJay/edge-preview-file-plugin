@@ -15,8 +15,13 @@
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  function highlight(text, language) {
-    if (text.length > MAX_HIGHLIGHT_LENGTH) return null;
+  function highlightLimit(renderer) {
+    return renderer.highlightLimit || MAX_HIGHLIGHT_LENGTH;
+  }
+
+  function highlight(text, renderer) {
+    if (text.length > highlightLimit(renderer)) return null;
+    const language = renderer.language;
     if (!window.Prism || !Prism.languages[language]) return null;
     try {
       return Prism.highlight(text, Prism.languages[language], language);
@@ -82,7 +87,7 @@
     });
     actions.appendChild(copyButton);
 
-    const html = renderer ? highlight(text, renderer.language) : null;
+    const html = renderer ? highlight(text, renderer) : null;
     const code = el('code');
     let raw = html === null;
     if (raw) {
@@ -150,5 +155,6 @@
       document.documentElement.classList.add('tpv-active');
     },
     el,
+    highlightLimit,
   };
 })();

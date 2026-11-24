@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Preview Any File",
   "version": "0.1.0",
-  "description": "在 Edge 中直接预览网页上的 TOML、YAML、TXT 文件，无需下载。",
+  "description": "在 Edge 中直接预览网页上的 TOML、YAML、TXT、LOG 文件，无需下载。",
   "permissions": ["downloads"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -26,16 +26,22 @@
         "http://*/*.txt*",
         "https://*/*.txt*",
         "http://*/*.TXT*",
-        "https://*/*.TXT*"
+        "https://*/*.TXT*",
+        "http://*/*.log*",
+        "https://*/*.log*",
+        "http://*/*.LOG*",
+        "https://*/*.LOG*"
       ],
       "js": [
         "vendor/prism.min.js",
         "vendor/prism-toml.min.js",
         "vendor/prism-yaml.min.js",
+        "vendor/prism-log.min.js",
         "src/registry.js",
         "src/renderers/toml.js",
         "src/renderers/yaml.js",
         "src/renderers/txt.js",
+        "src/renderers/log.js",
         "src/app.js",
         "src/content.js"
       ],

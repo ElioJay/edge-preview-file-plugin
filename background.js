@@ -1,8 +1,9 @@
-const PREVIEW_PATH = /\.(?:toml|ya?ml|txt)$/i;
-const TXT_PATH = /\.txt$/i;
-// Same limit as maxBytes in src/renderers/txt.js. Checked here only when the
-// server reports a size; otherwise the viewer enforces it while reading.
-const MAX_TXT_BYTES = 50 * 1024 * 1024;
+const PREVIEW_PATH = /\.(?:toml|ya?ml|txt|log)$/i;
+const SIZE_LIMITED_PATH = /\.(?:txt|log)$/i;
+// Same limit as maxBytes in src/renderers/txt.js and log.js. Checked here only
+// when the server reports a size; otherwise the viewer enforces it while
+// reading.
+const MAX_PREVIEW_BYTES = 50 * 1024 * 1024;
 // URLs the viewer explicitly asked to download; the next onCreated for them
 // must not be treated as a preview request.
 const allowedDownloads = new Set();
@@ -47,7 +48,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Resolves false when the server gives no usable size or does not answer in
 // time, so the file falls back to the viewer.
-function exceedsTxtLimit(url) {
+function exceedsSizeLimit(url) {
   return fetch(url, {
     method: 'HEAD',
     credentials: 'include',
@@ -56,7 +57,7 @@ function exceedsTxtLimit(url) {
     .then(
       (response) =>
         response.ok &&
-        Number(response.headers.get('content-length')) > MAX_TXT_BYTES
+        Number(response.headers.get('content-length')) > MAX_PREVIEW_BYTES
     )
     .catch(() => false);
 }
@@ -78,7 +79,7 @@ chrome.downloads.onCreated.addListener((item) => {
   if (allowedDownloads.delete(item.url)) return;
   if (item.byExtensionId) return;
   if (!isHttpPreviewUrl(item.url)) return;
-  if (!TXT_PATH.test(new URL(item.url).pathname)) {
+  if (!SIZE_LIMITED_PATH.test(new URL(item.url).pathname)) {
     openInViewer(item);
     return;
   }
@@ -87,7 +88,7 @@ chrome.downloads.onCreated.addListener((item) => {
   // while asking the server. Over the limit it resumes as a normal download.
   chrome.downloads.pause(item.id, () => {
     void chrome.runtime.lastError;
-    exceedsTxtLimit(item.url).then((tooLarge) => {
+    exceedsSizeLimit(item.url).then((tooLarge) => {
       if (!tooLarge) {
         openInViewer(item);
         return;

@@ -13,9 +13,15 @@
   }
 
   // Only restyle the browser's plain-text rendering, which Edge also uses for
-  // text/yaml and text/x-yaml. A matching URL that returns HTML is a normal
-  // page and must be left untouched.
-  const PLAIN_TEXT_TYPES = ['text/plain', 'text/yaml', 'text/x-yaml'];
+  // the YAML and log text types below. A matching URL that returns HTML is a
+  // normal page and must be left untouched.
+  const PLAIN_TEXT_TYPES = [
+    'text/plain',
+    'text/yaml',
+    'text/x-yaml',
+    'text/x-log',
+    'text/log',
+  ];
   if (!PLAIN_TEXT_TYPES.includes(document.contentType)) return;
 
   const renderer = TPV.registry.getByUrl(location.href);
@@ -46,7 +52,7 @@
     renderer,
     download: false,
     note:
-      renderer.language && text.length > 1024 * 1024
+      renderer.language && text.length > TPV.app.highlightLimit(renderer)
         ? '文件较大，已关闭语法高亮。'
         : '',
   });

@@ -18,6 +18,7 @@
   --tp-key: #0550ae;
   --tp-table: #cf222e;
   --tp-punct: #57606a;
+  --tp-warning: #9a6700;
   --tp-note-bg: #fff8c5;
   --tp-note-fg: #7d4e00;
   --tp-note-border: #d4a72c;
@@ -43,6 +44,7 @@
     --tp-key: #79c0ff;
     --tp-table: #ff7b72;
     --tp-punct: #8b949e;
+    --tp-warning: #d29922;
     --tp-note-bg: #3b2300;
     --tp-note-fg: #f0b72f;
     --tp-note-border: #9e6a03;
@@ -233,7 +235,8 @@ html.tpv-active body {
 }
 
 .tpv-code .token.date,
-.tpv-code .token.datetime {
+.tpv-code .token.datetime,
+.tpv-code .token.time {
   color: var(--tp-date);
 }
 
@@ -251,6 +254,40 @@ html.tpv-active body {
 
 .tpv-code .token.punctuation {
   color: var(--tp-punct);
+}
+
+/* Log levels. Prism also tags ERROR/WARN as "important"; these selectors are
+   more specific, so they win regardless of order. TRACE is aliased as a
+   comment and needs no rule. */
+.tpv-code .token.level.error {
+  color: var(--tp-table);
+  font-weight: 600;
+}
+
+.tpv-code .token.level.warning {
+  color: var(--tp-warning);
+  font-weight: 600;
+}
+
+.tpv-code .token.level.info {
+  color: var(--tp-key);
+}
+
+.tpv-code .token.level.debug {
+  color: var(--tp-muted);
+}
+
+/* Log "key:" labels, IPs/UUIDs/hashes/domains, and links. */
+.tpv-code .token.property {
+  color: var(--tp-key);
+}
+
+.tpv-code .token.constant {
+  color: var(--tp-number);
+}
+
+.tpv-code .token.url {
+  color: var(--tp-accent);
 }
 
 .tpv-loading {
