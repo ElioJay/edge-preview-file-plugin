@@ -244,6 +244,17 @@ html.tpv-active body {
   color: var(--tp-punct);
 }
 
+.tpv-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--tp-bg);
+  color: var(--tp-muted);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+
 .tpv-error {
   display: flex;
   flex-direction: column;
