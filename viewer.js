@@ -20,6 +20,29 @@
     });
   }
 
+  // Stops reading once the body passes maxBytes, so an oversized file is never
+  // fully loaded. Content-Length is not trusted: it may be missing or count
+  // compressed bytes.
+  async function readText(response, maxBytes) {
+    if (!maxBytes) return response.text();
+    const reader = response.body.getReader();
+    const chunks = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        reader.cancel().catch(() => {});
+        const error = new Error('file too large');
+        error.name = 'TooLargeError';
+        throw error;
+      }
+      chunks.push(value);
+    }
+    return new Response(new Blob(chunks)).text();
+  }
+
   function showError(title, detail, url) {
     const wrap = TPV.app.el('div', 'tpv-error');
     wrap.appendChild(TPV.app.el('div', 'tpv-error-title', title));
@@ -44,7 +67,7 @@
   }
 
   if (!src) {
-    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml 下载链接重新打开预览。');
+    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml / .txt 下载链接重新打开预览。');
     return;
   }
 
@@ -74,7 +97,9 @@
         throw new Error('HTTP ' + response.status + ' ' + response.statusText);
       }
       const type = (response.headers.get('content-type') || '').toLowerCase();
-      return response.text().then((text) => ({ text, type }));
+      return readText(response, renderer && renderer.maxBytes).then(
+        (text) => ({ text, type })
+      );
     })
     .then(({ text, type }) => {
       clearTimeout(timer);
@@ -93,6 +118,15 @@
     })
     .catch((error) => {
       clearTimeout(timer);
+      if (error && error.name === 'TooLargeError') {
+        const limit = Math.round(renderer.maxBytes / (1024 * 1024)) + ' MB';
+        showError(
+          '文件过大',
+          '文件超过 ' + limit + '，不在查看器中打开，请下载原文件查看。',
+          src
+        );
+        return;
+      }
       const message =
         error && error.name === 'AbortError'
           ? '请求超时（20 秒）。'

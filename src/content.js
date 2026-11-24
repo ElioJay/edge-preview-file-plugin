@@ -25,6 +25,17 @@
   const text = pre ? pre.textContent : document.body.innerText;
   if (typeof text !== 'string' || text.length === 0) return;
 
+  // Over the renderer's limit, keep the browser's native view. UTF-8 never
+  // has fewer bytes than UTF-16 code units, so the length check alone can
+  // reject huge files without encoding them.
+  if (
+    renderer.maxBytes &&
+    (text.length > renderer.maxBytes ||
+      new TextEncoder().encode(text).length > renderer.maxBytes)
+  ) {
+    return;
+  }
+
   document.documentElement.setAttribute('data-tpv-enhanced', '1');
 
   TPV.app.renderPage({
@@ -34,6 +45,9 @@
       fileNameFromUrl(location.href) || document.title || 'untitled',
     renderer,
     download: false,
-    note: text.length > 1024 * 1024 ? '文件较大，已关闭语法高亮。' : '',
+    note:
+      renderer.language && text.length > 1024 * 1024
+        ? '文件较大，已关闭语法高亮。'
+        : '',
   });
 })();
