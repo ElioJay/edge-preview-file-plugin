@@ -106,14 +106,14 @@
       actions.appendChild(toggle);
     }
 
-    if (download && typeof chrome !== 'undefined' && chrome.downloads) {
+    if (download && typeof chrome !== 'undefined' && chrome.runtime) {
       const downloadButton = el('button', 'tpv-btn', '下载原文件');
       downloadButton.type = 'button';
       downloadButton.addEventListener('click', () => {
-        chrome.downloads.download({ url }, () => {
-          downloadButton.textContent = chrome.runtime.lastError
-            ? '下载失败'
-            : '已开始下载';
+        chrome.runtime.sendMessage({ type: 'download', url }, (response) => {
+          void chrome.runtime.lastError;
+          downloadButton.textContent =
+            response && response.ok ? '已开始下载' : '下载失败';
           setTimeout(() => {
             downloadButton.textContent = '下载原文件';
           }, 1500);
