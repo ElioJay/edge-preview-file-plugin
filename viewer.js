@@ -7,10 +7,10 @@
 
   function fileName(url) {
     try {
-      const base = new URL(url).pathname.split('/').pop() || 'file.toml';
+      const base = new URL(url).pathname.split('/').pop() || 'untitled';
       return decodeURIComponent(base);
     } catch {
-      return 'file.toml';
+      return 'untitled';
     }
   }
 
@@ -44,7 +44,7 @@
   }
 
   if (!src) {
-    showError('缺少文件地址', '请从一个 .toml 下载链接重新打开预览。');
+    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml 下载链接重新打开预览。');
     return;
   }
 
@@ -63,7 +63,7 @@
 
   const name = fileName(src);
   const renderer = TPV.registry.getByUrl(src);
-  document.title = name + ' · TOML Preview';
+  document.title = name + ' · Preview Any File';
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);

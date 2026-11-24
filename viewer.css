@@ -232,11 +232,20 @@ html.tpv-active body {
   color: var(--tp-number);
 }
 
-.tpv-code .token.date {
+.tpv-code .token.date,
+.tpv-code .token.datetime {
   color: var(--tp-date);
 }
 
-.tpv-code .token.boolean {
+/* YAML tags (!!str) and anchors/aliases (&a, *a). Prism also aliases YAML
+   boolean/null as "important", so this rule must stay above theirs. */
+.tpv-code .token.tag,
+.tpv-code .token.important {
+  color: var(--tp-table);
+}
+
+.tpv-code .token.boolean,
+.tpv-code .token.null {
   color: var(--tp-boolean);
 }
 

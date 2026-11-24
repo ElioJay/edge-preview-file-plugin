@@ -12,14 +12,11 @@
     }
   }
 
-  // Only restyle the browser's plain-text rendering. A .toml URL that
-  // returns HTML is a normal page and must be left untouched.
-  if (
-    typeof document.contentType !== 'string' ||
-    !document.contentType.startsWith('text/plain')
-  ) {
-    return;
-  }
+  // Only restyle the browser's plain-text rendering, which Edge also uses for
+  // text/yaml and text/x-yaml. A matching URL that returns HTML is a normal
+  // page and must be left untouched.
+  const PLAIN_TEXT_TYPES = ['text/plain', 'text/yaml', 'text/x-yaml'];
+  if (!PLAIN_TEXT_TYPES.includes(document.contentType)) return;
 
   const renderer = TPV.registry.getByUrl(location.href);
   if (!renderer) return;

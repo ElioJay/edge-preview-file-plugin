@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "TOML Preview",
+  "name": "Preview Any File",
   "version": "0.1.0",
-  "description": "在 Edge 中直接高亮预览网页上的 TOML 文件，无需下载。",
+  "description": "在 Edge 中直接高亮预览网页上的 TOML、YAML 文件，无需下载。",
   "permissions": ["downloads"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -14,13 +14,23 @@
         "http://*/*.toml*",
         "https://*/*.toml*",
         "http://*/*.TOML*",
-        "https://*/*.TOML*"
+        "https://*/*.TOML*",
+        "http://*/*.yaml*",
+        "https://*/*.yaml*",
+        "http://*/*.YAML*",
+        "https://*/*.YAML*",
+        "http://*/*.yml*",
+        "https://*/*.yml*",
+        "http://*/*.YML*",
+        "https://*/*.YML*"
       ],
       "js": [
         "vendor/prism.min.js",
         "vendor/prism-toml.min.js",
+        "vendor/prism-yaml.min.js",
         "src/registry.js",
         "src/renderers/toml.js",
+        "src/renderers/yaml.js",
         "src/app.js",
         "src/content.js"
       ],

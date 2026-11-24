@@ -1,14 +1,14 @@
-const TOML_PATH = /\.toml$/i;
+const PREVIEW_PATH = /\.(?:toml|ya?ml)$/i;
 // URLs the viewer explicitly asked to download; the next onCreated for them
 // must not be treated as a preview request.
 const allowedDownloads = new Set();
 
-function isHttpTomlUrl(value) {
+function isHttpPreviewUrl(value) {
   try {
     const url = new URL(value);
     return (
       (url.protocol === 'http:' || url.protocol === 'https:') &&
-      TOML_PATH.test(url.pathname)
+      PREVIEW_PATH.test(url.pathname)
     );
   } catch {
     return false;
@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.downloads.onCreated.addListener((item) => {
   if (allowedDownloads.delete(item.url)) return;
   if (item.byExtensionId) return;
-  if (!isHttpTomlUrl(item.url)) return;
+  if (!isHttpPreviewUrl(item.url)) return;
 
   chrome.downloads.cancel(item.id, () => {
     void chrome.runtime.lastError;
