@@ -8,7 +8,7 @@
 - **下载拦截**：网页以 `application/toml`、`application/yaml`、`application/x-yaml`、`application/octet-stream` 等会触发下载的类型返回上述文件时，扩展取消下载，并在新标签页用查看器渲染。
 - **查看器**：语法高亮、行号、复制、原始文本切换、下载原文件。TXT 只显示纯文本和行号，没有高亮和「原始文本」切换。
 - **LOG 高亮**：日志级别分色（ERROR 红、WARN 橙、INFO 蓝、DEBUG 灰、TRACE 灰色斜体），另外高亮时间戳、IP / UUID / 哈希、URL、字符串和 Java 异常堆栈。
-- **.env 文件名**：`.env`、`*.env`（如 `app.env`），以及 `.env.local`、`.env.example`、`.env.production`、`.env.development.local` 等 `.env.*` 变体。`.env.*` 的最后一段如果是已注册的扩展名（如 `.env.yaml`、`.env.txt`），按该扩展名的类型渲染。
+- **.env 文件名**：`.env`、`*.env`（如 `app.env`），以及 `.env.local`、`.env.example`、`.env.production`、`.env.development.local` 等 `.env.*` 变体。`.env.*` 的最后一段如果是其他文件格式，就不算 .env：已支持的类型（如 `.env.yaml`、`.env.txt`）按该类型显示；其余（如 `.env.json`、`.env.xml`，以及 `.env.gpg`、`.env.zip` 这类加密或压缩文件）不接管，交给浏览器默认处理。排除名单见 `src/dotenv-names.js`。
 - **.env 高亮**：注释、`export`、变量名、`=`、单 / 双 / 反引号字符串（含多行）、未加引号的值，以及双引号和未加引号值里的 `${VAR}` / `$VAR`。`#` 只有在行首或空白之后才算注释，所以 `COLOR=#fff`、`"a #b"` 里的 `#` 属于值。
 - **TXT / LOG 大小上限**：`.txt`、`.log` 超过 50 MB 时不接管，详见下方「已知限制」。TOML / YAML / .env 没有这个上限。
 - **多类型框架**：渲染器按扩展名注册，目前注册了 `toml`、`yaml`（`.yaml` / `.yml`）、`txt`、`log` 和 `dotenv`（`.env` / `*.env` / `.env.*`），后续可加 JSON / INI。
@@ -44,7 +44,7 @@
 - 文件大于 1 MB 时关闭语法高亮，只显示原文；LOG 的阈值是 5 MB。就地美化页面会提示「文件较大，已关闭语法高亮」，查看器不提示。
 - LOG 高亮在主线程同步完成，接近 5 MB 的日志打开时页面会卡住约 5 秒；从「原始文本」切回「高亮」时会重新渲染，再卡几秒。
 - 所有 `.txt` / `.log` 链接都会被接管，包括各站点的 `robots.txt` 这类文件。
-- `.env.*` 按文件名匹配，最后一段不是已注册扩展名的都按 .env 渲染，例如 `.env.json` 也会被当成 .env 高亮。
+- `.env.*` 的排除名单只列了常见格式。不在名单里的后缀（比如某种少见的二进制格式）仍会按 .env 接管。
 - .env 的写法各实现并不统一（如 `#` 什么时候算注释），高亮按上面的通用规则，和具体加载库的解析结果可能有出入。
 - `.txt` / `.log` 超过 50 MB 时不接管：
   - 就地美化：保留浏览器原生的纯文本显示。
@@ -62,6 +62,7 @@ viewer.js              查看器：fetch 原文件并渲染
 viewer.css             查看器 + 内容脚本共用的样式
 src/
   registry.js          渲染器注册表（按扩展名分发，可选按文件名规则兜底）
+  dotenv-names.js      哪些 .env.* 文件名算 .env（内容脚本、查看器、background.js 共用）
   renderers/toml.js    TOML 渲染器注册
   renderers/yaml.js    YAML 渲染器注册（.yaml / .yml）
   renderers/txt.js     TXT 渲染器注册（无高亮，50 MB 上限）
@@ -97,7 +98,7 @@ tests/
    可选字段：
    - `language: null`：不高亮，参照 `src/renderers/txt.js`。
    - `highlightLimit`：关闭高亮的字符数阈值，默认 1 MB，参照 `src/renderers/log.js`。
-   - `filenames`：按文件名匹配的正则（对 URL 路径最后一段测试），参照 `src/renderers/env.js`。扩展名匹配优先，扩展名没有对应渲染器时才用它；`background.js` 的 `PREVIEW_PATH` 也要加上同样的规则。
+   - `filenames`：按文件名匹配的正则（对 URL 路径最后一段测试），参照 `src/renderers/env.js`。扩展名匹配优先，扩展名没有对应渲染器时才用它；`background.js` 的 `isHttpPreviewUrl` 也要用同一条规则。规则需要两边共用时，参照 `src/dotenv-names.js` 单独放一个文件，在 `background.js` 里用 `importScripts` 加载。
    - `maxBytes`：大小上限（字节数），超过就不接管。内容脚本和查看器会读取它；`background.js` 的 `SIZE_LIMITED_PATH` 和 `MAX_PREVIEW_BYTES` 需要一起改。
 
 3. 把该脚本加入 `viewer.html` 和 `manifest.json` 的 `content_scripts.js`（放在 `src/app.js` 之前）。
@@ -124,5 +125,5 @@ node tests/e2e.cjs
 - YAML：`application/x-yaml` 下载被接管并在查看器里渲染
 - TXT：就地美化无高亮；2 MB 文件不出现「关闭高亮」提示
 - LOG：`text/plain`、`text/x-log` 就地高亮，ERROR / WARN / INFO 配色互不相同；2 MB 仍然高亮；6 MB 关闭高亮并提示
-- ENV：`.env`、`app.env`、`.env.example` 就地高亮；注释、变量引用、`export`、多行字符串的识别符合预期；`.env.yaml` 仍按 YAML 渲染；`.env.local` 下载被接管并在查看器高亮
+- ENV：`.env`、`app.env`、`.env.example`、`.env.development.local` 就地高亮；注释、变量引用、`export`、多行字符串的识别符合预期；`.env.yaml` 仍按 YAML 渲染；`.env.local` 下载被接管并在查看器高亮；`.env.json` 不被就地美化；`.env.gpg` 下载不被拦截
 - TXT 和 LOG 各自：超过 50 MB 时保留浏览器原生显示；下载被接管并在查看器显示；超过 50 MB 且大小已知时正常下载完整文件；大小未知且超过 50 MB 时查看器提示文件过大

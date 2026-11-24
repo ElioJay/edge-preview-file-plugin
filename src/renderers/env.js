@@ -46,7 +46,6 @@
     label: 'ENV',
     language: 'dotenv',
     extensions: ['env'],
-    // .env.local, .env.example, .env.development.local, ...
-    filenames: /^\.env\..+$/i,
+    filenames: window.TPV.dotenvNames,
   });
 })();

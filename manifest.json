@@ -46,6 +46,7 @@
         "src/renderers/yaml.js",
         "src/renderers/txt.js",
         "src/renderers/log.js",
+        "src/dotenv-names.js",
         "src/renderers/env.js",
         "src/app.js",
         "src/content.js"

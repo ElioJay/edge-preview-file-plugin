@@ -1,5 +1,6 @@
-// The last alternative covers .env.local, .env.example, ... by name.
-const PREVIEW_PATH = /\.(?:toml|ya?ml|txt|log|env)$|\/\.env\.[^/]+$/i;
+importScripts('src/dotenv-names.js');
+
+const PREVIEW_PATH = /\.(?:toml|ya?ml|txt|log|env)$/i;
 const SIZE_LIMITED_PATH = /\.(?:txt|log)$/i;
 // Same limit as maxBytes in src/renderers/txt.js and log.js. Checked here only
 // when the server reports a size; otherwise the viewer enforces it while
@@ -12,9 +13,10 @@ const allowedDownloads = new Set();
 function isHttpPreviewUrl(value) {
   try {
     const url = new URL(value);
+    const base = url.pathname.slice(url.pathname.lastIndexOf('/') + 1);
     return (
       (url.protocol === 'http:' || url.protocol === 'https:') &&
-      PREVIEW_PATH.test(url.pathname)
+      (PREVIEW_PATH.test(url.pathname) || TPV.dotenvNames.test(base))
     );
   } catch {
     return false;
