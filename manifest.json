@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Preview Any File",
   "version": "0.1.0",
-  "description": "在 Edge 中直接预览网页上的 TOML、YAML、TXT、LOG、.env、Markdown 文件，无需下载。",
+  "description": "在 Edge 中直接预览网页上的 TOML、YAML、JSON、TXT、LOG、.env、Markdown 文件，无需下载。",
   "permissions": ["downloads"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -42,7 +42,11 @@
         "http://*/*.markdown*",
         "https://*/*.markdown*",
         "http://*/*.MARKDOWN*",
-        "https://*/*.MARKDOWN*"
+        "https://*/*.MARKDOWN*",
+        "http://*/*.json*",
+        "https://*/*.json*",
+        "http://*/*.JSON*",
+        "https://*/*.JSON*"
       ],
       "js": [
         "src/prism-config.js",
@@ -51,6 +55,8 @@
         "vendor/prism-yaml.min.js",
         "vendor/prism-log.min.js",
         "vendor/prism-markdown.min.js",
+        "vendor/prism-json.min.js",
+        "vendor/prism-json5.min.js",
         "vendor/marked.umd.js",
         "vendor/purify.min.js",
         "src/decode.js",
@@ -62,6 +68,7 @@
         "src/dotenv-names.js",
         "src/renderers/env.js",
         "src/renderers/markdown.js",
+        "src/renderers/json.js",
         "src/app.js",
         "src/content.js"
       ],

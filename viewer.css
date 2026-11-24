@@ -300,6 +300,11 @@ html.tpv-active body {
   color: var(--tp-boolean);
 }
 
+/* JSON null is aliased as "keyword"; keep it with the other literals. */
+.tpv-code .token.null.keyword {
+  color: var(--tp-boolean);
+}
+
 /* Markdown source: headings are also "important" (red); emphasis keeps its
    meaning in the code view. */
 .tpv-code .token.title,

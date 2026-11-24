@@ -75,47 +75,70 @@
     const actions = el('div', 'tpv-actions');
     header.appendChild(actions);
 
-    const copyButton = el('button', 'tpv-btn', '复制');
-    copyButton.type = 'button';
-    copyButton.addEventListener('click', () => {
-      copyText(text).then((ok) => {
+    const notes = note ? [note] : [];
+
+    // What the code view and the copy button show: the file text, or its
+    // formatted form for renderers with format() (JSON).
+    let shown = text;
+    let html = null;
+    let raw = false;
+    // Renderers with a rendered view (Markdown) open on it; the code view is
+    // one click away.
+    const preview =
+      renderer && renderer.render ? renderer.render(text, url) : null;
+    let source = preview === null;
+
+    const button = (label, onClick) => {
+      const node = el('button', 'tpv-btn', label);
+      node.type = 'button';
+      node.addEventListener('click', onClick);
+      actions.appendChild(node);
+      return node;
+    };
+
+    const copyButton = button('复制', () => {
+      copyText(shown).then((ok) => {
         copyButton.textContent = ok ? '已复制' : '复制失败';
         setTimeout(() => {
           copyButton.textContent = '复制';
         }, 1200);
       });
     });
-    actions.appendChild(copyButton);
 
-    const html = renderer ? highlight(text, renderer) : null;
-    const code = el('code');
-    let raw = html === null;
-    if (raw) {
-      code.textContent = text;
-    } else {
-      code.innerHTML = html;
-    }
-
-    let toggle = null;
-    if (!raw) {
-      toggle = el('button', 'tpv-btn', '原始文本');
-      toggle.type = 'button';
-      toggle.addEventListener('click', () => {
-        raw = !raw;
-        if (raw) {
-          code.textContent = text;
-        } else {
-          code.innerHTML = html;
-        }
-        toggle.textContent = raw ? '高亮' : '原始文本';
+    const viewButton =
+      preview &&
+      button('', () => {
+        source = !source;
+        layout();
       });
-      actions.appendChild(toggle);
+
+    let formatted = null;
+    if (renderer && renderer.format) {
+      try {
+        formatted = renderer.format(text);
+      } catch (error) {
+        notes.push(error.message);
+      }
     }
+    const formatButton =
+      formatted !== null &&
+      formatted !== text.trim() &&
+      button('', () => {
+        show(shown === formatted ? text : formatted);
+        layout();
+      });
+
+    // Only renderers with a grammar can switch highlighting off.
+    const toggle =
+      renderer && renderer.language
+        ? button('', () => {
+            raw = !raw;
+            paint();
+          })
+        : null;
 
     if (download && typeof chrome !== 'undefined' && chrome.runtime) {
-      const downloadButton = el('button', 'tpv-btn', '下载原文件');
-      downloadButton.type = 'button';
-      downloadButton.addEventListener('click', () => {
+      const downloadButton = button('下载原文件', () => {
         chrome.runtime.sendMessage({ type: 'download', url }, (response) => {
           void chrome.runtime.lastError;
           downloadButton.textContent =
@@ -125,48 +148,58 @@
           }, 1500);
         });
       });
-      actions.appendChild(downloadButton);
     }
 
     root.appendChild(header);
 
-    if (note) root.appendChild(el('div', 'tpv-note', note));
+    for (const message of notes) root.appendChild(el('div', 'tpv-note', message));
 
     const main = el('main', 'tpv-main');
     const wrap = el('div', 'tpv-code-wrap');
     const gutter = el('div', 'tpv-gutter');
-    gutter.textContent = Array.from(
-      { length: lineCount },
-      (_, index) => index + 1
-    ).join('\n');
     const pre = el('pre', 'tpv-code');
+    const code = el('code');
     pre.appendChild(code);
     wrap.appendChild(gutter);
     wrap.appendChild(pre);
     main.appendChild(wrap);
+    if (preview) main.appendChild(preview);
     root.appendChild(main);
 
-    // Renderers with a rendered view (Markdown) open on it; the code view is
-    // one click away.
-    if (renderer && renderer.render) {
-      const preview = renderer.render(text, url);
-      main.appendChild(preview);
-      const viewButton = el('button', 'tpv-btn');
-      viewButton.type = 'button';
-      let source = false;
-      const update = () => {
-        preview.hidden = source;
-        wrap.hidden = !source;
-        if (toggle) toggle.hidden = !source;
-        viewButton.textContent = source ? '预览' : '源码';
-      };
-      viewButton.addEventListener('click', () => {
-        source = !source;
-        update();
-      });
-      copyButton.after(viewButton);
-      update();
+    function paint() {
+      if (raw || html === null) {
+        code.textContent = shown;
+      } else {
+        code.innerHTML = html;
+      }
+      if (toggle) toggle.textContent = raw ? '高亮' : '原始文本';
     }
+
+    function show(value) {
+      shown = value;
+      html = renderer ? highlight(shown, renderer) : null;
+      gutter.textContent = Array.from(
+        { length: shown.split('\n').length },
+        (_, index) => index + 1
+      ).join('\n');
+      paint();
+    }
+
+    // Visibility only; never re-renders the code, which is slow for big files.
+    function layout() {
+      wrap.hidden = !source;
+      if (preview) preview.hidden = source;
+      if (viewButton) viewButton.textContent = source ? '预览' : '源码';
+      if (formatButton) {
+        formatButton.hidden = !source;
+        formatButton.textContent = shown === formatted ? '原文' : '格式化';
+      }
+      if (toggle) toggle.hidden = !source || html === null;
+    }
+
+    // Minified (single-line) JSON is unreadable as is, so it opens formatted.
+    show(formatButton && !text.trim().includes('\n') ? formatted : text);
+    layout();
 
     return root;
   }
