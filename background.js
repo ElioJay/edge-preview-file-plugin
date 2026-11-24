@@ -1,4 +1,5 @@
-const PREVIEW_PATH = /\.(?:toml|ya?ml|txt|log)$/i;
+// The last alternative covers .env.local, .env.example, ... by name.
+const PREVIEW_PATH = /\.(?:toml|ya?ml|txt|log|env)$|\/\.env\.[^/]+$/i;
 const SIZE_LIMITED_PATH = /\.(?:txt|log)$/i;
 // Same limit as maxBytes in src/renderers/txt.js and log.js. Checked here only
 // when the server reports a size; otherwise the viewer enforces it while

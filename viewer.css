@@ -290,6 +290,16 @@ html.tpv-active body {
   color: var(--tp-accent);
 }
 
+/* .env: "export" and ${VAR} / $VAR references. Log levels that Prism also
+   aliases as "keyword" keep their own, more specific colors. */
+.tpv-code .token.keyword {
+  color: var(--tp-table);
+}
+
+.tpv-code .token.variable {
+  color: var(--tp-boolean);
+}
+
 .tpv-loading {
   display: flex;
   align-items: center;

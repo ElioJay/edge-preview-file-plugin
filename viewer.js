@@ -67,7 +67,7 @@
   }
 
   if (!src) {
-    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml / .txt / .log 下载链接重新打开预览。');
+    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml / .txt / .log / .env 下载链接重新打开预览。');
     return;
   }
 
