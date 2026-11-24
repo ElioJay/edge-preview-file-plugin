@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "TOML Preview",
+  "version": "0.1.0",
+  "description": "在 Edge 中直接高亮预览网页上的 TOML 文件，无需下载。",
+  "permissions": ["downloads"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*.toml*",
+        "https://*/*.toml*",
+        "http://*/*.TOML*",
+        "https://*/*.TOML*"
+      ],
+      "js": [
+        "vendor/prism.min.js",
+        "vendor/prism-toml.min.js",
+        "src/registry.js",
+        "src/renderers/toml.js",
+        "src/app.js",
+        "src/content.js"
+      ],
+      "css": ["viewer.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

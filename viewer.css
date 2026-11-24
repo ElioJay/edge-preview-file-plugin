@@ -1,0 +1,284 @@
+:root {
+  color-scheme: light dark;
+  --tp-bg: #ffffff;
+  --tp-bg-alt: #f6f8fa;
+  --tp-fg: #1f2328;
+  --tp-muted: #6e7781;
+  --tp-border: #d0d7de;
+  --tp-accent: #0969da;
+  --tp-header-bg: rgba(255, 255, 255, 0.92);
+  --tp-code-bg: #ffffff;
+  --tp-gutter-bg: #f6f8fa;
+  --tp-selection: #b6d7ff;
+  --tp-comment: #6e7781;
+  --tp-string: #0a3069;
+  --tp-number: #953800;
+  --tp-boolean: #8250df;
+  --tp-date: #116329;
+  --tp-key: #0550ae;
+  --tp-table: #cf222e;
+  --tp-punct: #57606a;
+  --tp-note-bg: #fff8c5;
+  --tp-note-fg: #7d4e00;
+  --tp-note-border: #d4a72c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tp-bg: #0d1117;
+    --tp-bg-alt: #161b22;
+    --tp-fg: #e6edf3;
+    --tp-muted: #8b949e;
+    --tp-border: #30363d;
+    --tp-accent: #4493f8;
+    --tp-header-bg: rgba(13, 17, 23, 0.92);
+    --tp-code-bg: #0d1117;
+    --tp-gutter-bg: #161b22;
+    --tp-selection: #264f78;
+    --tp-comment: #8b949e;
+    --tp-string: #a5d6ff;
+    --tp-number: #ffa657;
+    --tp-boolean: #d2a8ff;
+    --tp-date: #7ee787;
+    --tp-key: #79c0ff;
+    --tp-table: #ff7b72;
+    --tp-punct: #8b949e;
+    --tp-note-bg: #3b2300;
+    --tp-note-fg: #f0b72f;
+    --tp-note-border: #9e6a03;
+  }
+}
+
+html.tpv-active,
+html.tpv-active body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+}
+
+.tpv-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.tpv-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--tp-border);
+  background: var(--tp-header-bg);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.tpv-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tpv-badge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: var(--tp-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.tpv-filename {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tpv-meta {
+  flex-shrink: 0;
+  color: var(--tp-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tpv-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.tpv-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--tp-border);
+  border-radius: 6px;
+  background: var(--tp-bg-alt);
+  color: var(--tp-fg);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tpv-btn:hover {
+  border-color: var(--tp-muted);
+}
+
+.tpv-btn:active {
+  transform: translateY(1px);
+}
+
+.tpv-note {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--tp-note-border);
+  background: var(--tp-note-bg);
+  color: var(--tp-note-fg);
+  font-size: 13px;
+}
+
+.tpv-main {
+  flex: 1;
+  overflow: auto;
+  background: var(--tp-code-bg);
+}
+
+.tpv-code-wrap {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  min-width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.tpv-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 12px 12px 24px 16px;
+  border-right: 1px solid var(--tp-border);
+  background: var(--tp-gutter-bg);
+  color: var(--tp-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+    monospace;
+  font-size: 12.5px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: pre;
+  user-select: none;
+}
+
+.tpv-code {
+  flex: 1;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 12px 24px 24px 16px;
+  color: var(--tp-fg);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+    monospace;
+  font-size: 12.5px;
+  line-height: 20px;
+  tab-size: 4;
+  white-space: pre;
+}
+
+.tpv-code code {
+  font: inherit;
+}
+
+.tpv-code::selection,
+.tpv-code *::selection {
+  background: var(--tp-selection);
+}
+
+.tpv-code .token.comment {
+  color: var(--tp-comment);
+  font-style: italic;
+}
+
+.tpv-code .token.table {
+  color: var(--tp-table);
+  font-weight: 600;
+}
+
+.tpv-code .token.key {
+  color: var(--tp-key);
+}
+
+.tpv-code .token.string {
+  color: var(--tp-string);
+}
+
+.tpv-code .token.number {
+  color: var(--tp-number);
+}
+
+.tpv-code .token.date {
+  color: var(--tp-date);
+}
+
+.tpv-code .token.boolean {
+  color: var(--tp-boolean);
+}
+
+.tpv-code .token.punctuation {
+  color: var(--tp-punct);
+}
+
+.tpv-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+.tpv-error-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tpv-error-detail {
+  color: var(--tp-muted);
+  font-size: 13px;
+}
+
+.tpv-error-url {
+  max-width: 720px;
+  color: var(--tp-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+    monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.tpv-error-actions {
+  display: flex;
+  gap: 8px;
+}

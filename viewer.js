@@ -1,0 +1,100 @@
+(function () {
+  const TPV = window.TPV;
+  const app = document.getElementById('app');
+  const src = new URLSearchParams(location.search).get('src');
+
+  document.documentElement.classList.add('tpv-active');
+
+  function fileName(url) {
+    try {
+      const base = new URL(url).pathname.split('/').pop() || 'file.toml';
+      return decodeURIComponent(base);
+    } catch {
+      return 'file.toml';
+    }
+  }
+
+  function download(url) {
+    Promise.resolve(chrome.downloads.download({ url })).catch(() => {});
+  }
+
+  function showError(title, detail, url) {
+    const wrap = TPV.app.el('div', 'tpv-error');
+    wrap.appendChild(TPV.app.el('div', 'tpv-error-title', title));
+    if (detail) wrap.appendChild(TPV.app.el('div', 'tpv-error-detail', detail));
+    if (url) wrap.appendChild(TPV.app.el('code', 'tpv-error-url', url));
+
+    const actions = TPV.app.el('div', 'tpv-error-actions');
+    const retry = TPV.app.el('button', 'tpv-btn', '重试');
+    retry.type = 'button';
+    retry.addEventListener('click', () => location.reload());
+    actions.appendChild(retry);
+
+    if (url) {
+      const downloadButton = TPV.app.el('button', 'tpv-btn', '下载原文件');
+      downloadButton.type = 'button';
+      downloadButton.addEventListener('click', () => download(url));
+      actions.appendChild(downloadButton);
+    }
+
+    wrap.appendChild(actions);
+    app.replaceChildren(wrap);
+  }
+
+  if (!src) {
+    showError('缺少文件地址', '请从一个 .toml 下载链接重新打开预览。');
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(src);
+  } catch {
+    showError('文件地址无效', '', src);
+    return;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    showError('不支持的地址类型', '预览器只支持 http/https 地址。', src);
+    return;
+  }
+
+  const name = fileName(src);
+  const renderer = TPV.registry.getByUrl(src);
+  document.title = name + ' · TOML Preview';
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+
+  fetch(src, { credentials: 'include', signal: controller.signal })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status + ' ' + response.statusText);
+      }
+      const type = (response.headers.get('content-type') || '').toLowerCase();
+      return response.text().then((text) => ({ text, type }));
+    })
+    .then(({ text, type }) => {
+      clearTimeout(timer);
+      const isHtml = type.includes('text/html');
+      TPV.app.renderPage({
+        text,
+        url: src,
+        title: name,
+        renderer: isHtml ? null : renderer,
+        container: app,
+        download: true,
+        note: isHtml
+          ? '服务器返回的是 HTML 页面（可能需要登录），已按原文显示。'
+          : '',
+      });
+    })
+    .catch((error) => {
+      clearTimeout(timer);
+      const message =
+        error && error.name === 'AbortError'
+          ? '请求超时（20 秒）。'
+          : String((error && error.message) || error);
+      showError('无法读取该文件', message, src);
+    });
+})();
