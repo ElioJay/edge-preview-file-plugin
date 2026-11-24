@@ -15,7 +15,9 @@
   }
 
   function download(url) {
-    Promise.resolve(chrome.downloads.download({ url })).catch(() => {});
+    chrome.runtime.sendMessage({ type: 'download', url }, () => {
+      void chrome.runtime.lastError;
+    });
   }
 
   function showError(title, detail, url) {

@@ -1,4 +1,7 @@
 const TOML_PATH = /\.toml$/i;
+// URLs the viewer explicitly asked to download; the next onCreated for them
+// must not be treated as a preview request.
+const allowedDownloads = new Set();
 
 function isHttpTomlUrl(value) {
   try {
@@ -12,9 +15,34 @@ function isHttpTomlUrl(value) {
   }
 }
 
+function allowDownload(url) {
+  allowedDownloads.add(url);
+  setTimeout(() => allowedDownloads.delete(url), 15000);
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!message || message.type !== 'download' || typeof message.url !== 'string') {
+    return;
+  }
+  let parsed;
+  try {
+    parsed = new URL(message.url);
+  } catch {
+    return;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return;
+
+  allowDownload(message.url);
+  chrome.downloads.download({ url: message.url }, (id) => {
+    const error = chrome.runtime.lastError;
+    if (error) allowedDownloads.delete(message.url);
+    sendResponse({ ok: !error, id });
+  });
+  return true;
+});
+
 chrome.downloads.onCreated.addListener((item) => {
-  // Downloads started by an extension (including this viewer's "下载原文件")
-  // are explicit intent, so leave them alone.
+  if (allowedDownloads.delete(item.url)) return;
   if (item.byExtensionId) return;
   if (!isHttpTomlUrl(item.url)) return;
 
