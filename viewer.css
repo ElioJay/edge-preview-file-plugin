@@ -300,6 +300,183 @@ html.tpv-active body {
   color: var(--tp-boolean);
 }
 
+/* Markdown source: headings are also "important" (red); emphasis keeps its
+   meaning in the code view. */
+.tpv-code .token.title,
+.tpv-code .token.bold {
+  font-weight: 600;
+}
+
+.tpv-code .token.italic {
+  font-style: italic;
+}
+
+.tpv-code .token.strike {
+  text-decoration: line-through;
+}
+
+/* .tpv-code-wrap and others set display, which would beat the UA rule. */
+.tpv-root [hidden] {
+  display: none !important;
+}
+
+/* Rendered Markdown */
+.tpv-markdown {
+  box-sizing: border-box;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+  color: var(--tp-fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+
+.tpv-markdown > :first-child {
+  margin-top: 0;
+}
+
+.tpv-markdown h1,
+.tpv-markdown h2,
+.tpv-markdown h3,
+.tpv-markdown h4,
+.tpv-markdown h5,
+.tpv-markdown h6 {
+  margin: 24px 0 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.tpv-markdown h1,
+.tpv-markdown h2 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--tp-border);
+}
+
+.tpv-markdown h1 {
+  font-size: 2em;
+}
+
+.tpv-markdown h2 {
+  font-size: 1.5em;
+}
+
+.tpv-markdown h3 {
+  font-size: 1.25em;
+}
+
+.tpv-markdown h4 {
+  font-size: 1em;
+}
+
+.tpv-markdown h5 {
+  font-size: 0.875em;
+}
+
+.tpv-markdown h6 {
+  color: var(--tp-muted);
+  font-size: 0.85em;
+}
+
+.tpv-markdown p,
+.tpv-markdown blockquote,
+.tpv-markdown ul,
+.tpv-markdown ol,
+.tpv-markdown dl,
+.tpv-markdown table,
+.tpv-markdown pre {
+  margin: 0 0 16px;
+}
+
+.tpv-markdown a {
+  color: var(--tp-accent);
+  text-decoration: none;
+}
+
+.tpv-markdown a:hover {
+  text-decoration: underline;
+}
+
+.tpv-markdown ul,
+.tpv-markdown ol {
+  padding-left: 2em;
+}
+
+.tpv-markdown li + li {
+  margin-top: 0.25em;
+}
+
+.tpv-markdown li > input[type="checkbox"] {
+  margin: 0 0.4em 0 0;
+  vertical-align: middle;
+}
+
+.tpv-markdown blockquote {
+  padding: 0 1em;
+  border-left: 0.25em solid var(--tp-border);
+  color: var(--tp-muted);
+}
+
+.tpv-markdown code {
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  background: var(--tp-bg-alt);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+    monospace;
+  font-size: 85%;
+}
+
+.tpv-markdown pre {
+  padding: 16px;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--tp-bg-alt);
+  line-height: 1.45;
+}
+
+.tpv-markdown pre code {
+  padding: 0;
+  background: transparent;
+  white-space: pre;
+}
+
+.tpv-markdown table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+}
+
+.tpv-markdown th,
+.tpv-markdown td {
+  padding: 6px 13px;
+  border: 1px solid var(--tp-border);
+}
+
+.tpv-markdown th {
+  background: var(--tp-bg-alt);
+  font-weight: 600;
+}
+
+.tpv-markdown img {
+  max-width: 100%;
+}
+
+.tpv-markdown hr {
+  height: 0.25em;
+  margin: 24px 0;
+  border: 0;
+  background: var(--tp-border);
+}
+
+@media (max-width: 600px) {
+  .tpv-markdown {
+    padding: 20px 16px 48px;
+  }
+}
+
 .tpv-loading {
   display: flex;
   align-items: center;

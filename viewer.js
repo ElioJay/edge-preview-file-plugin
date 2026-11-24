@@ -20,11 +20,15 @@
     });
   }
 
-  // Stops reading once the body passes maxBytes, so an oversized file is never
-  // fully loaded. Content-Length is not trusted: it may be missing or count
-  // compressed bytes.
+  // Decodes with TPV.decodeText (UTF-8 or GBK) instead of response.text(),
+  // which always assumes UTF-8. Stops reading once the body passes maxBytes,
+  // so an oversized file is never fully loaded. Content-Length is not
+  // trusted: it may be missing or count compressed bytes.
   async function readText(response, maxBytes) {
-    if (!maxBytes) return response.text();
+    const type = response.headers.get('content-type');
+    if (!maxBytes) {
+      return TPV.decodeText(new Uint8Array(await response.arrayBuffer()), type);
+    }
     const reader = response.body.getReader();
     const chunks = [];
     let total = 0;
@@ -40,7 +44,10 @@
       }
       chunks.push(value);
     }
-    return new Response(new Blob(chunks)).text();
+    return TPV.decodeText(
+      new Uint8Array(await new Blob(chunks).arrayBuffer()),
+      type
+    );
   }
 
   function showError(title, detail, url) {
@@ -67,7 +74,7 @@
   }
 
   if (!src) {
-    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml / .txt / .log / .env 下载链接重新打开预览。');
+    showError('缺少文件地址', '请从一个 .toml / .yaml / .yml / .txt / .log / .env / .md 下载链接重新打开预览。');
     return;
   }
 

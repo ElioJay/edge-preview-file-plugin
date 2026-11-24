@@ -96,8 +96,9 @@
       code.innerHTML = html;
     }
 
+    let toggle = null;
     if (!raw) {
-      const toggle = el('button', 'tpv-btn', '原始文本');
+      toggle = el('button', 'tpv-btn', '原始文本');
       toggle.type = 'button';
       toggle.addEventListener('click', () => {
         raw = !raw;
@@ -144,6 +145,28 @@
     wrap.appendChild(pre);
     main.appendChild(wrap);
     root.appendChild(main);
+
+    // Renderers with a rendered view (Markdown) open on it; the code view is
+    // one click away.
+    if (renderer && renderer.render) {
+      const preview = renderer.render(text, url);
+      main.appendChild(preview);
+      const viewButton = el('button', 'tpv-btn');
+      viewButton.type = 'button';
+      let source = false;
+      const update = () => {
+        preview.hidden = source;
+        wrap.hidden = !source;
+        if (toggle) toggle.hidden = !source;
+        viewButton.textContent = source ? '预览' : '源码';
+      };
+      viewButton.addEventListener('click', () => {
+        source = !source;
+        update();
+      });
+      copyButton.after(viewButton);
+      update();
+    }
 
     return root;
   }
