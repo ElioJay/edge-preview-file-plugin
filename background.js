@@ -1,10 +1,11 @@
 importScripts('src/dotenv-names.js');
 
-const PREVIEW_PATH = /\.(?:toml|ya?ml|json[c5]?|txt|log|env|md|markdown)$/i;
-const SIZE_LIMITED_PATH = /\.(?:txt|log)$/i;
-// Same limit as maxBytes in src/renderers/txt.js and log.js. Checked here only
-// when the server reports a size; otherwise the viewer enforces it while
-// reading.
+const PREVIEW_PATH =
+  /\.(?:toml|ya?ml|json[c5]?|txt|log|env|md|markdown|sh|bash|zsh)$/i;
+const SIZE_LIMITED_PATH = /\.(?:txt|log|sh|bash|zsh)$/i;
+// Same limit as maxBytes in src/renderers/txt.js, log.js and shell.js.
+// Checked here only when the server reports a size; otherwise the viewer
+// enforces it while reading.
 const MAX_PREVIEW_BYTES = 50 * 1024 * 1024;
 // URLs the viewer explicitly asked to download; the next onCreated for them
 // must not be treated as a preview request.

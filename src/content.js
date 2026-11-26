@@ -13,8 +13,8 @@
   }
 
   // Only restyle the browser's plain-text rendering, which Edge also uses for
-  // the YAML, log and Markdown text types below. A matching URL that returns
-  // HTML is a normal page and must be left untouched.
+  // the YAML, log, Markdown and shell text types below. A matching URL that
+  // returns HTML is a normal page and must be left untouched.
   const PLAIN_TEXT_TYPES = [
     'text/plain',
     'text/yaml',
@@ -23,6 +23,8 @@
     'text/log',
     'text/markdown',
     'text/x-markdown',
+    'text/x-sh',
+    'text/x-shellscript',
   ];
   if (!PLAIN_TEXT_TYPES.includes(document.contentType)) return;
 

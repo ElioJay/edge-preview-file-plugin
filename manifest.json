@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Preview Any File",
   "version": "0.1.0",
-  "description": "在 Edge 中直接预览网页上的 TOML、YAML、JSON、TXT、LOG、.env、Markdown 文件，无需下载。",
+  "description": "在 Edge 中直接预览网页上的 TOML、YAML、JSON、TXT、LOG、.env、Markdown、Shell 脚本文件，无需下载。",
   "permissions": ["downloads", "webRequest"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -46,7 +46,19 @@
         "http://*/*.json*",
         "https://*/*.json*",
         "http://*/*.JSON*",
-        "https://*/*.JSON*"
+        "https://*/*.JSON*",
+        "http://*/*.sh*",
+        "https://*/*.sh*",
+        "http://*/*.SH*",
+        "https://*/*.SH*",
+        "http://*/*.bash*",
+        "https://*/*.bash*",
+        "http://*/*.BASH*",
+        "https://*/*.BASH*",
+        "http://*/*.zsh*",
+        "https://*/*.zsh*",
+        "http://*/*.ZSH*",
+        "https://*/*.ZSH*"
       ],
       "js": [
         "src/prism-config.js",
@@ -57,6 +69,7 @@
         "vendor/prism-markdown.min.js",
         "vendor/prism-json.min.js",
         "vendor/prism-json5.min.js",
+        "vendor/prism-bash.min.js",
         "vendor/marked.umd.js",
         "vendor/purify.min.js",
         "src/decode.js",
@@ -69,6 +82,7 @@
         "src/renderers/env.js",
         "src/renderers/markdown.js",
         "src/renderers/json.js",
+        "src/renderers/shell.js",
         "src/app.js",
         "src/content.js"
       ],

@@ -300,6 +300,12 @@ html.tpv-active body {
   color: var(--tp-boolean);
 }
 
+/* Shell: builtins (set, echo) and function names. */
+.tpv-code .token.builtin,
+.tpv-code .token.function {
+  color: var(--tp-key);
+}
+
 /* JSON null is aliased as "keyword"; keep it with the other literals. */
 .tpv-code .token.null.keyword {
   color: var(--tp-boolean);
