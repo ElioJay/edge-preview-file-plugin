@@ -5,7 +5,7 @@
 ## 功能
 
 - **就地美化**：网页以 `text/plain` 返回 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.md` / `.markdown` 或 .env 类文件时，内容脚本在原页面替换为预览视图，地址栏 URL 保持不变。YAML 以 `text/yaml`、`text/x-yaml` 返回，LOG 以 `text/x-log`、`text/log` 返回，或 Markdown 以 `text/markdown`、`text/x-markdown` 返回时，Edge 同样按纯文本显示，也会被就地美化。
-- **下载拦截**：网页以 `application/toml`、`application/yaml`、`application/x-yaml`、`application/octet-stream` 等会触发下载的类型返回上述文件时，扩展取消下载，并在新标签页用查看器渲染。
+- **下载拦截**：网页以 `application/toml`、`application/yaml`、`application/x-yaml`、`application/octet-stream` 等会触发下载的类型返回上述文件时，扩展取消下载，在点击链接的那个页签里打开查看器，浏览器的后退键可以回到原页面，前进键再回到查看器。Ctrl / 中键点击这类本来就要新开页签的操作，仍在新页签打开。
 - **查看器**：语法高亮、行号、复制、原始文本切换、下载原文件。TXT 只显示纯文本和行号，没有高亮和「原始文本」切换。
 - **JSON**：`.json` 显示带行号的高亮源码，另有「格式化 / 原文」切换。压缩成一行的 JSON 默认就展开成两空格缩进的格式。格式化只调整缩进和换行，数字和字符串原样保留，不经过 `JSON.parse` 转换，超过 2^53 的大整数 ID 不会丢精度；复制按钮复制当前显示的内容。不是合法 JSON 时按原文显示，并提示 `JSON.parse` 给出的出错位置。`.jsonc`（允许注释，如 VS Code 配置、`tsconfig`）和 `.json5` 不是严格 JSON，只高亮不格式化。以 `application/json`、`text/json` 或 `+json` 类型返回的响应由 Edge 自带的 JSON 查看器显示，扩展不接管。
 - **Markdown 预览**：用 marked 渲染（支持 GFM 的表格、任务列表、删除线、围栏代码块），默认显示排版后的文档，「源码」按钮切到带行号和高亮的源码，「预览」切回。渲染结果先经 DOMPurify 清洗，文档里的 `<script>`、事件属性（如 `onerror`）、`javascript:` 链接都会被去掉，不会在网站页面里执行。相对链接和图片按原文件地址补全，查看器里同样能显示。
@@ -28,13 +28,14 @@
 打开任意网页上的 `.toml`、`.yaml`、`.yml`、`.json`、`.jsonc`、`.json5`、`.txt`、`.log`、`.md`、`.markdown` 或 .env 类文件链接：
 
 - 服务器以 `text/plain`（YAML 还包括 `text/yaml`、`text/x-yaml`；LOG 还包括 `text/x-log`、`text/log`；Markdown 还包括 `text/markdown`、`text/x-markdown`）返回：页面会被就地美化。JSON 以 `application/json` 等类型返回时由 Edge 自带的 JSON 查看器显示。
-- 服务器以 `application/toml`、`application/yaml`、`application/x-yaml` 或 `application/octet-stream` 返回：浏览器会短暂开始下载，扩展会取消并打开查看器标签页。
+- 服务器以 `application/toml`、`application/yaml`、`application/x-yaml` 或 `application/octet-stream` 返回：浏览器会短暂开始下载，扩展会取消下载，并在当前页签打开查看器，后退即可回到原页面。
 
 ## 权限说明
 
 | 权限 | 用途 |
 | --- | --- |
 | `downloads` | 取消或暂停 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.md` / `.markdown` / .env 类文件下载；查看器里的「下载原文件」 |
+| `webRequest` | 记下每个文件地址是从哪个页签发起的导航，下载出现时据此在同一页签打开查看器；只观察请求，不拦截、不修改 |
 | `http://*/*`、`https://*/*` | 内容脚本匹配 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.md` / `.markdown` / .env 类文件 URL；查看器重新 fetch 原文件（带 cookie）；对 `.txt` / `.log` 下载发 HEAD 请求查询大小；就地美化页面在编码可能有误时重新请求一次原文件 |
 
 不需要文件系统权限。本地 `file://` 文件不在本扩展范围内——Edge 本身会以纯文本打开它们。
@@ -43,6 +44,7 @@
 
 - 显式「另存为」一个 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.md` / `.markdown` / .env 类文件也会被接管；查看器里提供了「下载原文件」。
 - 下载条目可能闪现一下，取消后会从下载列表移除。
+- 以下情况对不上发起的页签，查看器仍新开页签：带 `download` 属性的链接（浏览器直接下载，没有页面导航）；Ctrl / 中键点击；在空白页签（如新标签页）里打开文件地址，这时空白页签会留在原地。
 - 内容脚本只匹配全小写或全大写后缀（`.toml` / `.TOML`、`.yaml` / `.YAML`、`.yml` / `.YML`、`.txt` / `.TXT`、`.log` / `.LOG`、`.env` / `.ENV`、`.md` / `.MD`、`.markdown` / `.MARKDOWN`、`.json` / `.JSON`（含 `.jsonc`、`.json5`））；混合大小写（如 `.Yaml`）不会触发就地美化，但下载拦截仍会处理。
 - 文件大于 1 MB 时关闭语法高亮，只显示原文；LOG 的阈值是 5 MB。就地美化页面会提示「文件较大，已关闭语法高亮」，查看器不提示。
 - LOG 高亮在主线程同步完成，接近 5 MB 的日志打开时页面会卡住约 5 秒；从「原始文本」切回「高亮」时会重新渲染，再卡几秒。
@@ -141,6 +143,7 @@ node tests/e2e.cjs
 - `text/plain` 页面就地美化、URL 不变、token 与行号存在
 - 带 query string 的 URL 也能匹配
 - `application/toml` 下载被接管并在查看器里渲染
+- 查看器在当前页签打开、页签数不变；后退回到原页面，前进重新显示查看器；Ctrl+点击仍新开页签且原页面不变；查看器里再点会下载的链接也在同一页签打开，可后退
 - YAML：`text/plain`、`text/yaml`、`text/x-yaml`（含大写 `.YML`）就地美化，key / boolean / null / anchor 高亮正确
 - YAML：`application/x-yaml` 下载被接管并在查看器里渲染
 - TXT：就地美化无高亮；2 MB 文件不出现「关闭高亮」提示

@@ -65,16 +65,56 @@ function exceedsSizeLimit(url) {
     .catch(() => false);
 }
 
+// The tab each recent top-level navigation to a preview URL came from. A
+// download item carries no tab id; this lets the viewer replace the page the
+// link was clicked on, so Back returns to it, instead of opening a new tab.
+const navigationTabs = new Map();
+
+chrome.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    if (details.tabId < 0 || !isHttpPreviewUrl(details.url)) return;
+    navigationTabs.set(details.url, details.tabId);
+    setTimeout(() => {
+      if (navigationTabs.get(details.url) === details.tabId) {
+        navigationTabs.delete(details.url);
+      }
+    }, 30000);
+  },
+  { urls: ['http://*/*', 'https://*/*'], types: ['main_frame'] }
+);
+
+// A tab with no page of its own (opened by Ctrl- or middle-click just for
+// this link) is closed by the browser once the download starts, so it gets a
+// new tab, as does a download whose tab is unknown.
+function showViewer(tabId, url) {
+  const openNewTab = () => chrome.tabs.create({ url });
+  if (tabId === undefined) {
+    openNewTab();
+    return;
+  }
+  chrome.tabs.get(tabId, (tab) => {
+    if (chrome.runtime.lastError || !tab.url) {
+      openNewTab();
+      return;
+    }
+    chrome.tabs.update(tabId, { url }, () => {
+      if (chrome.runtime.lastError) openNewTab();
+    });
+  });
+}
+
 function openInViewer(item) {
+  const tabId = navigationTabs.get(item.url);
+  navigationTabs.delete(item.url);
   chrome.downloads.cancel(item.id, () => {
     void chrome.runtime.lastError;
     Promise.resolve(chrome.downloads.erase({ id: item.id })).catch(() => {});
-    chrome.tabs.create({
-      url:
-        chrome.runtime.getURL('viewer.html') +
+    showViewer(
+      tabId,
+      chrome.runtime.getURL('viewer.html') +
         '?src=' +
-        encodeURIComponent(item.url),
-    });
+        encodeURIComponent(item.url)
+    );
   });
 }
 

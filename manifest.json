@@ -3,7 +3,7 @@
   "name": "Preview Any File",
   "version": "0.1.0",
   "description": "在 Edge 中直接预览网页上的 TOML、YAML、JSON、TXT、LOG、.env、Markdown 文件，无需下载。",
-  "permissions": ["downloads"],
+  "permissions": ["downloads", "webRequest"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
     "service_worker": "background.js"
