@@ -207,6 +207,48 @@ html.tpv-active body {
   font: inherit;
 }
 
+/* Wrapped view (Alt+Z), one .tpv-line per line. The number column is the
+   background gradient plus each line's data-n, so it lines up with the first
+   row of a wrapped line and matches .tpv-gutter's width and padding. */
+.tpv-lines {
+  --tpv-gutter-width: calc(var(--tpv-digits) * 1ch + 28px);
+  min-height: 100%;
+  padding-left: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: linear-gradient(
+    to right,
+    var(--tp-gutter-bg) var(--tpv-gutter-width),
+    var(--tp-border) var(--tpv-gutter-width)
+      calc(var(--tpv-gutter-width) + 1px),
+    transparent calc(var(--tpv-gutter-width) + 1px)
+  );
+}
+
+/* Chunks of LINES_PER_CHUNK (src/app.js) lines; off-screen ones skip layout
+   and are assumed to be one 20px row per line until first shown. */
+.tpv-lines > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 4000px;
+}
+
+.tpv-line {
+  display: block;
+  position: relative;
+  min-height: 20px;
+  padding-left: calc(var(--tpv-gutter-width) + 17px);
+}
+
+.tpv-line::before {
+  content: attr(data-n);
+  position: absolute;
+  left: 0;
+  width: calc(var(--tpv-gutter-width) - 12px);
+  color: var(--tp-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 .tpv-code::selection,
 .tpv-code *::selection {
   background: var(--tp-selection);
