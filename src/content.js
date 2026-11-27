@@ -79,7 +79,7 @@
       title:
         fileNameFromUrl(location.href) || document.title || 'untitled',
       renderer,
-      download: false,
+      download: true,
       note:
         renderer.language && text.length > TPV.app.highlightLimit(renderer)
           ? '文件较大，已关闭语法高亮。'

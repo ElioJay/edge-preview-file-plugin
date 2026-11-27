@@ -4,7 +4,7 @@
 
 ## 功能
 
-- **就地美化**：网页以 `text/plain` 返回 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.sh` / `.bash` / `.zsh` / `.md` / `.markdown` 或 .env 类文件时，内容脚本在原页面替换为预览视图，地址栏 URL 保持不变。YAML 以 `text/yaml`、`text/x-yaml` 返回，LOG 以 `text/x-log`、`text/log` 返回，Markdown 以 `text/markdown`、`text/x-markdown` 返回，或 Shell 脚本以 `text/x-sh`、`text/x-shellscript` 返回时，Edge 同样按纯文本显示，也会被就地美化。
+- **就地美化**：网页以 `text/plain` 返回 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.sh` / `.bash` / `.zsh` / `.md` / `.markdown` 或 .env 类文件时，内容脚本在原页面替换为预览视图，地址栏 URL 保持不变。YAML 以 `text/yaml`、`text/x-yaml` 返回，LOG 以 `text/x-log`、`text/log` 返回，Markdown 以 `text/markdown`、`text/x-markdown` 返回，或 Shell 脚本以 `text/x-sh`、`text/x-shellscript` 返回时，Edge 同样按纯文本显示，也会被就地美化。就地美化页面和查看器一样有「下载原文件」按钮，保存的是服务器上的原始文件。
 - **下载拦截**：网页以 `application/toml`、`application/yaml`、`application/x-yaml`、`application/x-sh`、`application/octet-stream` 等会触发下载的类型返回上述文件时，扩展取消下载，在点击链接的那个页签里打开查看器，浏览器的后退键可以回到原页面，前进键再回到查看器。Ctrl / 中键点击这类本来就要新开页签的操作，仍在新页签打开。
 - **查看器**：语法高亮、行号、复制、原始文本切换、下载原文件。TXT 只显示纯文本和行号，没有高亮和「原始文本」切换。
 - **JSON**：`.json` 显示带行号的高亮源码，另有「格式化 / 原文」切换。压缩成一行的 JSON 默认就展开成两空格缩进的格式。格式化只调整缩进和换行，数字和字符串原样保留，不经过 `JSON.parse` 转换，超过 2^53 的大整数 ID 不会丢精度；复制按钮复制当前显示的内容。不是合法 JSON 时按原文显示，并提示 `JSON.parse` 给出的出错位置。`.jsonc`（允许注释，如 VS Code 配置、`tsconfig`）和 `.json5` 不是严格 JSON，只高亮不格式化。以 `application/json`、`text/json` 或 `+json` 类型返回的响应由 Edge 自带的 JSON 查看器显示，扩展不接管。
@@ -35,7 +35,7 @@
 
 | 权限 | 用途 |
 | --- | --- |
-| `downloads` | 取消或暂停 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.sh` / `.bash` / `.zsh` / `.md` / `.markdown` / .env 类文件下载；查看器里的「下载原文件」 |
+| `downloads` | 取消或暂停 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.sh` / `.bash` / `.zsh` / `.md` / `.markdown` / .env 类文件下载；查看器和就地美化页面里的「下载原文件」 |
 | `webRequest` | 记下每个文件地址是从哪个页签发起的导航，下载出现时据此在同一页签打开查看器；只观察请求，不拦截、不修改 |
 | `http://*/*`、`https://*/*` | 内容脚本匹配 `.toml` / `.yaml` / `.yml` / `.json` / `.jsonc` / `.json5` / `.txt` / `.log` / `.sh` / `.bash` / `.zsh` / `.md` / `.markdown` / .env 类文件 URL；查看器重新 fetch 原文件（带 cookie）；对 `.txt` / `.log` / `.sh` / `.bash` / `.zsh` 下载发 HEAD 请求查询大小；就地美化页面在编码可能有误时重新请求一次原文件 |
 
@@ -146,6 +146,7 @@ node tests/e2e.cjs
 测试会启动本地 HTTP 服务，用 Playwright 加载未打包扩展，验证：
 
 - `text/plain` 页面就地美化、URL 不变、token 与行号存在
+- TOML、YAML、JSON、JSONC、TXT、LOG、.env、Markdown、Shell 各自的就地美化页面都有「下载原文件」：点击后下载完成，保存的字节与服务器原文件一致（含 GBK 文件），页面不跳转、不打开查看器
 - 带 query string 的 URL 也能匹配
 - `application/toml` 下载被接管并在查看器里渲染
 - 查看器在当前页签打开、页签数不变；后退回到原页面，前进重新显示查看器；Ctrl+点击仍新开页签且原页面不变；查看器里再点会下载的链接也在同一页签打开，可后退
